@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="{{ url_for('static', filename='favicon.ico')}}">
+    <title>Kosogor AK</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+</head>
+<body>
+    <div class="bg"></div>
+    <div id="app" class="container">
+        <div class="btn"><p>Take a photo</p></div>
+        <div class="image">
+            <img class="image" :src="imageSrc">
+        </div>
+        <!-- <div class="title"><h1>Raspberry PI Server</h1></div>
+        <div class="file">
+            <h1>Write text to file</h1>
+            <input type="text" v-model="stringToFile" />
+            <div class="btn" @click="sendStringToFile()"><p>Send</p></div>
+        </div>
+        <div class="led">
+            <h1>LED</h1>
+            <div class="btns">
+                <div class="btn" @click="onBtnClick()"><p>ON</p></div>
+                <div class="btn" @click="offBtnClick()"><p>OFF</p></div>
+            </div>
+            <div class="state"><img :src="stateLedImg"></div>
+        </div> -->
+    </div>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='vue.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='index.js')}}"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+body {
+    background: #F6FFFE;
+    overflow: hidden;
+    font-family: Helvetica, sans-serif;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; 
+}
+.bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1276px;
+    height: 1276px;
+    border-radius: 1276px;
+    background: radial-gradient(104.01% 104.01% at 18.97% 10.83%, rgba(173, 0, 255, 0.51) 0%, rgba(255, 255, 255, 0.00) 52.6%, rgba(0, 255, 224, 0.55) 100%);
+    filter: blur(20px);
+}
+.container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 745px;
+    height: 90%;
+    border-radius: 20px;
+    background: linear-gradient(148deg, rgba(0, 255, 224, 0.05) 0%, rgba(173, 0, 255, 0.22) 100%);
+    box-shadow: 0px 0px 50px 0px #5873D4;
+}
+.btn {
+    position: relative;
+    margin: 30px auto;
+    width: 250px;
+    height: 50px;
+    cursor: pointer;
+    background: linear-gradient(90deg, rgba(62, 70, 249, 0.70) 0%, rgba(158, 0, 255, 0.70) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+.btn:hover {
+    background: linear-gradient(90deg, rgba(126, 132, 253, 0.70) 0%,rgba(201, 114, 255, 0.70) 100%);
+}
+.btn p{
+    margin: 0;
+    color: #FFF;
+    text-align: center;
+    font-size: 25px;
+    font-weight: 600;
+    width: 100%;
+}
+.image {
+    width: 100%;
+    height: 500px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

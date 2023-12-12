@@ -33,9 +33,9 @@ print(calculate_brightness(image_black))
 UPLOAD_FOLDER = 'img'
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+@app.route("/")
+def index():
+    return render_template('main.html')
 
 @app.route("/get_image", methods=['GET', 'POST'])
 def get_image():
@@ -48,3 +48,46 @@ def get_image():
 
 
 app.run(host='0.0.0.0', port=5555)
+
+
+
+
+
+
+
+
+
+
+'''
+@app.route("/getGpioState", methods=["get"])
+def getGpioState():
+    pin = request.args.get('pin')
+    global gpioState
+    if gpioState:
+        state = "on"
+    else:
+        state = "off"
+    print("gpio pin " + pin + " state = " + state)
+     
+    response = app.response_class(
+        response = state,
+        status = 200,
+        mimetype='text/html'
+    )
+    return response
+
+@app.route("/setStringToFile", methods=["post"])
+def setStringToFile():
+    data = request.get_json()
+    text = data.get('text')
+    print("new text to file is: " + text)
+    file = open('text.txt', 'w')
+    file.write(text)
+    file.close()
+    response = app.response_class(
+        response = 'ok',
+        status = 200,
+        mimetype='text/html'
+    )
+    return response
+'''
