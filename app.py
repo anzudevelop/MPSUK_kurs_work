@@ -1,13 +1,16 @@
 #pip install Flask
 #pip install --upgrade Pillow
+#pip install flask-ngrok
 import os
 from PIL import Image
 from flask import Flask, render_template, request, send_from_directory
+from flask_ngrok import run_with_ngrok 
 import random
 
 app = Flask(__name__)
-pwm = random.random()
+run_with_ngrok(app)
 
+pwm = random.random()
 
 def calculate_brightness(image):
     greyscale_image = image.convert('L')
@@ -58,8 +61,8 @@ def logs():
 
 
 
-
-app.run(host='0.0.0.0', port=5555)
+if __name__ == "__main__":
+    app.run()
 
 
 
