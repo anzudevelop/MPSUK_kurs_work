@@ -11,33 +11,42 @@ const getData = async(url) => {
     return response.data
 }
 
-async function getGpioState(pin) {
-    const response = await getData(`/getGpioState?pin=${pin}`)
+
+// async function setGpioState(pin, state) {
+//     await postData(`/setGpioState`, {pin: pin, state: state})
+// }
+
+async function getLogs() {
+    const response = await getData(`/logs`)
     return response
-}
-async function setGpioState(pin, state) {
-    await postData(`/setGpioState`, {pin: pin, state: state})
 }
 
 const app = new Vue({
     el: "#app",
     data: {
-        imageSrc: '../img/image.jpg'
+        imageSrc: '',
+        logsLine: "",
     },
     mounted() {
+        getLogs().then(response => this.logsLine = `pwm = ${response}`)
+        setInterval(() => {
+            getLogs().then(response => this.logsLine = `pwm = ${response}`)
+        }, 3000)
         //this.updateState()
     },
     methods: {
+        btnClick: function() {
+            fetch("/get_image")
+            .then(response => response.blob())
+            .then(data => {
+                this.imageSrc = URL.createObjectURL(data)
+            });
+        },
+
         sendStringToFile: function() {
             console.log(this.stringToFile)
             postData('/setStringToFile', {text: this.stringToFile})
             this.stringToFile = ''
-        },
-        onBtnClick: function() {
-            setGpioState(40, 'on')
-            .then(() => {
-                this.updateState()
-            })
         },
         offBtnClick: function() {
             setGpioState(40, 'off')

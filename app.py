@@ -3,8 +3,10 @@
 import os
 from PIL import Image
 from flask import Flask, render_template, request, send_from_directory
+import random
 
 app = Flask(__name__)
+pwm = random.random()
 
 
 def calculate_brightness(image):
@@ -43,6 +45,16 @@ def get_image():
         print("Отправка фото...")
         return send_from_directory(UPLOAD_FOLDER, 'image.jpg')
 
+@app.route("/logs", methods=['GET'])
+def logs():
+    global pwm
+    print("pwm = " + str(pwm))
+    response = app.response_class(
+        response = str(pwm),
+        status = 200,
+        mimetype='text/html'
+    )
+    return response
 
 
 
