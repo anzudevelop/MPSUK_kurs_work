@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 pwm = random.random()
 noPhoto = True
+histogram = []
 
 def calculate_brightness(image):
     greyscale_image = image.convert('L')
@@ -27,6 +28,14 @@ def calculate_brightness(image):
         ratio = histogram[index] / pixels
         brightness += ratio * (-scale + index)
     return 1 if brightness == 255 else brightness / scale
+
+def histogram(image): #Возвращает кол-во пикселей с яркостью от 0 до 255
+    greyscale_image = image.convert('L')
+    histogram = greyscale_image.histogram()
+    sumValues = sum(histogram)
+    for index in range(0, 256):
+        histogram[index] = round((histogram[index] / sumValues) * 100)
+    return histogram
 
 def deletePhoto():
     os.system("rm filename image.jpg")
@@ -56,7 +65,16 @@ def get_image():
     global noPhoto
     noPhoto = False
     print("Отправка фото...")
+    global histogram
+    image1 = Image.open("image.jpg")
+    print("Вычисляю гистограмму")
+    histogram = histogram(image1)
     return send_from_directory(UPLOAD_FOLDER, 'image.jpg')    
+
+@app.route("/get_histogram", methods=['GET', 'POST'])
+def get_histogram():
+    global histogram
+    return histogram
 
 @app.route("/logs", methods=['GET'])
 def logs():
@@ -73,7 +91,12 @@ def logs():
 
 
 
+'''
+image1 = Image.open("test2.jpg")
+print(histogram(image1))
+'''
+
+
 if __name__ == "__main__":
     #app.run()
     app.run(host='0.0.0.0', port=5555)
-
