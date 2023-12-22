@@ -4,18 +4,28 @@ from PIL import Image
 from flask import Flask, render_template, request, send_from_directory
 from flask_ngrok import run_with_ngrok 
 import random
+import RPi.GPIO as GPIO
+import time
+
+GPIO_PWM_PIN = 40
+FREQUENCY = 1000
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(GPIO_PWM_PIN, GPIO.OUT)
+pwmOutput = GPIO.PWM(GPIO_PWM_PIN, FREQUENCY)
+
 
 #home_dir = os.system("fswebcam --no-banner -r 480x272 test1.jpg")
 #list_files = subprocess.run(["ls"])
 #os.system("fswebcam --no-banner -r 480x272 test1.jpg")
 
 app = Flask(__name__)
-#run_with_ngrok(app)
 
-
-pwm = random.random()
-noPhoto = True
-histogram = []
+PWM_START_VALUE = 0
+pwm = PWM_START_VALUE
+lastPwmValue = 0
+histogramOfPhoto = []
 
 def calculate_brightness(image):
     greyscale_image = image.convert('L')
@@ -30,27 +40,48 @@ def calculate_brightness(image):
     return 1 if brightness == 255 else brightness / scale
 
 def histogram(image): #Возвращает кол-во пикселей с яркостью от 0 до 255
+    print("Вычисляется гистрограмма")
     greyscale_image = image.convert('L')
     histogram = greyscale_image.histogram()
     sumValues = sum(histogram)
     for index in range(0, 256):
         histogram[index] = round((histogram[index] / sumValues) * 100)
+    print("Гистрограмма вычисенна")
+    print(histogram)
     return histogram
-
-def deletePhoto():
-    os.system("rm filename image.jpg")
-    global noPhoto
-    noPhoto = True
-# image1 = Image.open("test1.jpg")
-# image2 = Image.open("test2.jpg")
-# image3 = Image.open("test3.jpg")
-# image_white = Image.open("white.jpg")
-# image_black = Image.open("black.jpg")
-# print(calculate_brightness(image1))
-# print(calculate_brightness(image2))
-# print(calculate_brightness(image3))
-# print(calculate_brightness(image_white))
-# print(calculate_brightness(image_black))
+def photo():
+    print("Делаю снимок")
+    os.system("fswebcam --no-banner -r 480x272 image.jpg")
+def ledOn():
+    global pwmOutput
+    global pwm
+    print("Включаю подсветку")
+    pwmOutput.start(pwm * 100)
+def ledOff():
+    global pwmOutput
+    print("Выключаю подсветку")
+    pwmOutput.stop()
+    #GPIO.cleanup()
+def checkHistogram(histogramOfPhoto):
+    x = 70
+    sumOfOk = 0
+    global pwm
+    print("Значение ШИМ: " + str(pwm))
+    print("Проверка гистограммы")
+    for i in range(x, 256 - x):
+        sumOfOk = sumOfOk + histogramOfPhoto[i]
+    print("Сумма: " + str(sumOfOk))
+    if(sumOfOk < 50):
+        pwm += 0.1
+        if(pwm >= 1):
+            pwm = 1
+            return True
+        else:
+            print("Удаляю фото")
+            os.system("rm image.jpg")
+            return False
+    if(sumOfOk >= 50):
+        return True
 
 UPLOAD_FOLDER = ''
 
@@ -60,43 +91,53 @@ def index():
 
 @app.route("/get_image", methods=['GET', 'POST'])
 def get_image():
-    print("Делаю снимок")
-    os.system("fswebcam --no-banner -r 480x272 image.jpg")
-    global noPhoto
-    noPhoto = False
+    global pwm
+    global PWM_START_VALUE
+    global lastPwmValue
+    isOkResult = False
+    while isOkResult == False:   
+        ledOn()
+        photo()
+        ledOff()
+        global histogramOfPhoto
+        image = Image.open("image.jpg")
+        histogramOfPhoto = histogram(image)
+        isOkResult = checkHistogram(histogramOfPhoto)
     print("Отправка фото...")
-    global histogram
-    image1 = Image.open("image.jpg")
-    print("Вычисляю гистограмму")
-    histogram = histogram(image1)
+    lastPwmValue = pwm
+    pwm = PWM_START_VALUE
     return send_from_directory(UPLOAD_FOLDER, 'image.jpg')    
 
 @app.route("/get_histogram", methods=['GET', 'POST'])
 def get_histogram():
-    global histogram
-    return histogram
+    global histogramOfPhoto
+    print("Удаляю фото")
+    os.system("rm image.jpg")
+    response = app.response_class(
+        response = str(histogramOfPhoto),
+        status = 200,
+        mimetype = 'text/html'
+    )
+    return response
 
 @app.route("/logs", methods=['GET'])
 def logs():
-    global pwm
-    print("pwm = " + str(pwm))
+    global lastPwmValue
+    print("pwm = " + str(round(lastPwmValue * 100)) + "%")
     response = app.response_class(
-        response = str(pwm),
+        response = str(round(lastPwmValue * 100)),
         status = 200,
         mimetype='text/html'
     )
-    if(noPhoto == False):
-        deletePhoto()
     return response
 
 
 
 '''
-image1 = Image.open("test2.jpg")
+image1 = Image.open("image.jpg")
 print(histogram(image1))
 '''
 
 
 if __name__ == "__main__":
-    #app.run()
     app.run(host='0.0.0.0', port=5555)

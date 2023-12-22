@@ -20,40 +20,49 @@ async function getLogs() {
     const response = await getData(`/logs`)
     return response
 }
+async function getChartData() {
+    const response = await getData(`/get_histogram`)
+    return response
+}
 
 const app = new Vue({
     el: "#app",
     data: {
         imageSrc: '',
         logsLine: "",
+        loadInfo: false,
     },
     mounted() {
-        getLogs().then(response => this.logsLine = `pwm = ${response}`)
+        /*getLogs().then(response => this.logsLine = `pwm = ${response}`)
         setInterval(() => {
             getLogs().then(response => this.logsLine = `pwm = ${response}`)
-        }, 3000)
-        let pictureData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        let data = []
-        for(let i = 0; i < pictureData.length; i++) {
-            data.push({x: i, value: pictureData[i]})
-        }
-        anychart.onDocumentLoad(function() {
-            var chart = anychart.line(data);
-            chart.xAxis().title("Яркость(0-255)");
-            chart.yAxis().title("Пикселей, %");
-            //chart.yScale().maximum(100);
-            chart.title("Гистрограмма или че-то там");
-            chart.container("container").draw();
-          });
-        //this.updateState()
+        }, 3000)*/
     },
     methods: {
-        btnClick: function() {
-            fetch("/get_image")
+        btnClick: async function() {
+            this.loadInfo = true
+            this.imageSrc = '',
+            this.logsLine = "",
+            document.getElementById("containerChart").innerHTML = ""
+            await fetch("/get_image")
             .then(response => response.blob())
             .then(data => {
                 this.imageSrc = URL.createObjectURL(data)
-            });
+            })
+            this.loadInfo = false
+            await getChartData().then(response => {
+                let data = []
+                for(let i = 0; i < response.length; i++) {
+                    data.push({x: i, value: response[i]})
+                }
+                var chart = anychart.line(data);
+                chart.xAxis().title("Яркость(0-255)");
+                chart.yAxis().title("Пикселей, %");
+                //chart.yScale().maximum(100);
+                chart.title("Гистрограмма");
+                chart.container("containerChart").draw();
+            })
+            getLogs().then(response => this.logsLine = `Значение шим = ${response}%`)
         },
 
         sendStringToFile: function() {

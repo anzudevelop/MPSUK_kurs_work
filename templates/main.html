@@ -10,30 +10,19 @@
 <body>
     <div class="bg"></div>
     <div id="app" class="container">
-        <div class="btn" @click="btnClick"><p>Take a photo</p></div>
-        <div class="image">
+        <div class="loadingGif" v-show="loadInfo" style="display: none;">
+            <img src="../static/preloader.gif">
+        </div>
+        <div class="btn" @click="btnClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Take a photo</p></div>
+        <div :class="imageSrc.length > 0 ? 'image' : ''">
             <img v-show="imageSrc.length" :src="imageSrc" style="display: none;">
         </div>
         <div class="chart">
-            <div id="container"></div>
+            <div id="containerChart"></div>
         </div>
         <div class="logs">
             <p v-html="logsLine"></p>
         </div>
-        <!-- <div class="title"><h1>Raspberry PI Server</h1></div>
-        <div class="file">
-            <h1>Write text to file</h1>
-            <input type="text" v-model="stringToFile" />
-            <div class="btn" @click="sendStringToFile()"><p>Send</p></div>
-        </div>
-        <div class="led">
-            <h1>LED</h1>
-            <div class="btns">
-                <div class="btn" @click="onBtnClick()"><p>ON</p></div>
-                <div class="btn" @click="offBtnClick()"><p>OFF</p></div>
-            </div>
-            <div class="state"><img :src="stateLedImg"></div>
-        </div> -->
     </div>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.8/dist/vue.js"></script>
