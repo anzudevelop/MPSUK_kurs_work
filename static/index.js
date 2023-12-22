@@ -24,6 +24,13 @@ async function getChartData() {
     const response = await getData(`/get_histogram`)
     return response
 }
+async function setNewRange(newRange) {
+    if(Number(newRange) < 0 || Number(newRange) > 127) {
+        alert("Значение должно находиться в диапазоне от 0 до 100")
+        return
+    }
+    await postData('setRange', {range: newRange})
+}
 
 const app = new Vue({
     el: "#app",
@@ -31,6 +38,7 @@ const app = new Vue({
         imageSrc: '',
         logsLine: "",
         loadInfo: false,
+        range: 0,
     },
     mounted() {
         /*getLogs().then(response => this.logsLine = `pwm = ${response}`)
@@ -75,6 +83,9 @@ const app = new Vue({
             .then(() => {
                 this.updateState()
             })
+        },
+        btnChangeRangeClick: function() {
+            setNewRange(this.range)
         },
         updateState: function() {
             getGpioState(40)

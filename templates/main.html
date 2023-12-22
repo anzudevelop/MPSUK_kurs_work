@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" href="{{ url_for('static', filename='favicon.ico')}}">
     <title>Kosogor AK</title>
+    <!-- <link rel="stylesheet" href="../static/style.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
 </head>
 <body>
@@ -13,7 +14,11 @@
         <div class="loadingGif" v-show="loadInfo" style="display: none;">
             <img src="../static/preloader.gif">
         </div>
-        <div class="btn" @click="btnClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Take a photo</p></div>
+        <div class="header">
+            <div class="btn" @click="btnClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Take a photo</p></div>
+            <div class="btn" @click="btnChangeRangeClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Change Range</p></div>
+            <input type="text" :value="range" v-model="range"/>
+        </div>
         <div :class="imageSrc.length > 0 ? 'image' : ''">
             <img v-show="imageSrc.length" :src="imageSrc" style="display: none;">
         </div>

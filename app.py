@@ -4,21 +4,16 @@ from PIL import Image
 from flask import Flask, render_template, request, send_from_directory
 from flask_ngrok import run_with_ngrok 
 import random
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
 
 GPIO_PWM_PIN = 40
 FREQUENCY = 1000
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(GPIO_PWM_PIN, GPIO.OUT)
-pwmOutput = GPIO.PWM(GPIO_PWM_PIN, FREQUENCY)
-
-
-#home_dir = os.system("fswebcam --no-banner -r 480x272 test1.jpg")
-#list_files = subprocess.run(["ls"])
-#os.system("fswebcam --no-banner -r 480x272 test1.jpg")
+#GPIO.setwarnings(False)
+#GPIO.setmode(GPIO.BOARD)
+#GPIO.setup(GPIO_PWM_PIN, GPIO.OUT)
+#pwmOutput = GPIO.PWM(GPIO_PWM_PIN, FREQUENCY)
 
 app = Flask(__name__)
 
@@ -26,6 +21,7 @@ PWM_START_VALUE = 0
 pwm = PWM_START_VALUE
 lastPwmValue = 0
 histogramOfPhoto = []
+rangeForHistogram = 0
 
 def calculate_brightness(image):
     greyscale_image = image.convert('L')
@@ -63,12 +59,12 @@ def ledOff():
     pwmOutput.stop()
     #GPIO.cleanup()
 def checkHistogram(histogramOfPhoto):
-    x = 70
+    global rangeForHistogram
     sumOfOk = 0
     global pwm
     print("Значение ШИМ: " + str(pwm))
     print("Проверка гистограммы")
-    for i in range(x, 256 - x):
+    for i in range(rangeForHistogram, 256 - rangeForHistogram):
         sumOfOk = sumOfOk + histogramOfPhoto[i]
     print("Сумма: " + str(sumOfOk))
     if(sumOfOk < 50):
@@ -126,6 +122,20 @@ def logs():
     print("pwm = " + str(round(lastPwmValue * 100)) + "%")
     response = app.response_class(
         response = str(round(lastPwmValue * 100)),
+        status = 200,
+        mimetype='text/html'
+    )
+    return response
+
+@app.route("/setRange", methods=['POST'])
+def setRange():
+    global rangeForHistogram
+    data = request.get_json()
+    newRange = data.get('range')
+    print("new range set: " + str(newRange))
+    rangeForHistogram = newRange
+    response = app.response_class(
+        response = rangeForHistogram,
         status = 200,
         mimetype='text/html'
     )
