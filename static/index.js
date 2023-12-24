@@ -70,29 +70,10 @@ const app = new Vue({
                 chart.title("Гистрограмма");
                 chart.container("containerChart").draw();
             })
-            getLogs().then(response => this.logsLine = `Значение шим = ${response}%`)
-        },
-
-        sendStringToFile: function() {
-            console.log(this.stringToFile)
-            postData('/setStringToFile', {text: this.stringToFile})
-            this.stringToFile = ''
-        },
-        offBtnClick: function() {
-            setGpioState(40, 'off')
-            .then(() => {
-                this.updateState()
-            })
+            await getLogs().then(response => this.logsLine = `Значение шим = ${response}%`)
         },
         btnChangeRangeClick: function() {
             setNewRange(this.range)
-        },
-        updateState: function() {
-            getGpioState(40)
-            .then(state => {
-                this.state = state
-                this.stateLedImg = (state == 'on') ? "./static/ledOn.png" : "./static/ledOff.png"
-            })
         },
     },
 })

@@ -17,7 +17,7 @@
         <div class="header">
             <div class="btn" @click="btnClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Take a photo</p></div>
             <div class="btn" @click="btnChangeRangeClick" :class="loadInfo ? 'disabledbutton' : ''"><p>Change Range</p></div>
-            <input type="text" :value="range" v-model="range"/>
+            <input type="text" value="range" v-model="range"/>
         </div>
         <div :class="imageSrc.length > 0 ? 'image' : ''">
             <img v-show="imageSrc.length" :src="imageSrc" style="display: none;">

@@ -4,16 +4,16 @@ from PIL import Image
 from flask import Flask, render_template, request, send_from_directory
 from flask_ngrok import run_with_ngrok 
 import random
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 
 GPIO_PWM_PIN = 40
 FREQUENCY = 1000
 
-#GPIO.setwarnings(False)
-#GPIO.setmode(GPIO.BOARD)
-#GPIO.setup(GPIO_PWM_PIN, GPIO.OUT)
-#pwmOutput = GPIO.PWM(GPIO_PWM_PIN, FREQUENCY)
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(GPIO_PWM_PIN, GPIO.OUT)
+pwmOutput = GPIO.PWM(GPIO_PWM_PIN, FREQUENCY)
 
 app = Flask(__name__)
 
@@ -22,18 +22,6 @@ pwm = PWM_START_VALUE
 lastPwmValue = 0
 histogramOfPhoto = []
 rangeForHistogram = 0
-
-def calculate_brightness(image):
-    greyscale_image = image.convert('L')
-    histogram = greyscale_image.histogram()
-    pixels = sum(histogram)
-    brightness = scale = len(histogram)
-
-    for index in range(0, scale):
-
-        ratio = histogram[index] / pixels
-        brightness += ratio * (-scale + index)
-    return 1 if brightness == 255 else brightness / scale
 
 def histogram(image): #Возвращает кол-во пикселей с яркостью от 0 до 255
     print("Вычисляется гистрограмма")
@@ -58,12 +46,16 @@ def ledOff():
     print("Выключаю подсветку")
     pwmOutput.stop()
     #GPIO.cleanup()
+def deletePreviousPhoto():
+    print("Удаляю фото")
+    os.system("rm image.jpg")
 def checkHistogram(histogramOfPhoto):
     global rangeForHistogram
     sumOfOk = 0
     global pwm
     print("Значение ШИМ: " + str(pwm))
     print("Проверка гистограммы")
+    print("Диапазон: " + str(rangeForHistogram) + "-" + str(256 - rangeForHistogram))
     for i in range(rangeForHistogram, 256 - rangeForHistogram):
         sumOfOk = sumOfOk + histogramOfPhoto[i]
     print("Сумма: " + str(sumOfOk))
@@ -73,8 +65,6 @@ def checkHistogram(histogramOfPhoto):
             pwm = 1
             return True
         else:
-            print("Удаляю фото")
-            os.system("rm image.jpg")
             return False
     if(sumOfOk >= 50):
         return True
@@ -92,6 +82,7 @@ def get_image():
     global lastPwmValue
     isOkResult = False
     while isOkResult == False:   
+        deletePreviousPhoto()
         ledOn()
         photo()
         ledOff()
@@ -107,8 +98,6 @@ def get_image():
 @app.route("/get_histogram", methods=['GET', 'POST'])
 def get_histogram():
     global histogramOfPhoto
-    print("Удаляю фото")
-    os.system("rm image.jpg")
     response = app.response_class(
         response = str(histogramOfPhoto),
         status = 200,
@@ -133,12 +122,12 @@ def setRange():
     data = request.get_json()
     newRange = data.get('range')
     print("new range set: " + str(newRange))
-    rangeForHistogram = newRange
     response = app.response_class(
-        response = rangeForHistogram,
+        response = newRange,
         status = 200,
         mimetype='text/html'
     )
+    rangeForHistogram = int(newRange)
     return response
 
 
@@ -151,3 +140,9 @@ print(histogram(image1))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5555)
+'''
+ledOn()
+time.sleep(2)
+ledOff()
+GPIO.cleanup()
+'''
